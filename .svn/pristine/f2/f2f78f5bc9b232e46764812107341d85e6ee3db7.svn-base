@@ -1,0 +1,16 @@
+package dw35_wz23.server.game.model;
+
+import gov.nasa.worldwind.render.SurfaceText;
+
+import java.io.Serializable;
+
+public class GameModel implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3391459558942258062L;
+//	SurfaceText sf = new SurfaceText(null, null);
+	public void start(){
+		
+	};
+}

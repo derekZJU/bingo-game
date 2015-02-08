@@ -1,0 +1,13 @@
+package common;
+
+import java.io.Serializable;
+
+/**
+ * Known msg for leaving a room
+ * @author Colin
+ *
+ */
+public interface ILeaveRoomMsg extends Serializable {
+
+	//please use IMember getSender() in the ADatapacket to get the userstub
+}

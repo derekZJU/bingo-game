@@ -1,0 +1,19 @@
+package dw35_wz23.server.game.controller;
+
+import dw35_wz23.server.game.model.GameModel;
+import dw35_wz23.server.game.view.GameView;
+
+public class GameController {
+	private GameModel model;
+	private GameView view;
+	
+	GameController(){
+		view = new GameView();
+		model = new GameModel();
+	}
+	
+	public void start() {
+		model.start();
+		view.start();
+	}
+}

@@ -1,0 +1,30 @@
+package dw35_wz23.server.chatroom.model;
+
+import map.MapPanel;
+import common.ICmd2ModelAdapter;
+import provided.datapacket.ADataPacket;
+import provided.datapacket.ADataPacketAlgoCmd;
+import provided.datapacket.DataPacket;
+import dw35_wz23.server.model.InstallMsg;
+
+public class InstallCmd extends ADataPacketAlgoCmd<ADataPacket,InstallMsg, Void>{
+	transient private ICmd2ModelAdapter model;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1106581587492504309L;
+
+	@Override
+	public ADataPacket apply(Class<?> index, DataPacket<InstallMsg> host,
+			Void... params) {
+		model.addComponent("Bingo", new MapPanel());
+		return null;
+	}
+
+	@Override
+	public void setCmd2ModelAdpt(ICmd2ModelAdapter cmd2ModelAdpt) {
+		model = cmd2ModelAdpt;
+		
+	}
+
+}

@@ -1,0 +1,7 @@
+package dw35_wz23.server.game.view;
+
+import java.io.Serializable;
+
+public interface IPanel2ViewAdapter extends Serializable{
+	public void sendUpdate(String content);
+}

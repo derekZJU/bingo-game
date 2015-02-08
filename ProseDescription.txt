@@ -1,0 +1,92 @@
+​​​​Final Project  [dw35, wz23]
+
+1. Prose description of how your game will work, including typical game play with winning and losing.
+Name of Game: Dish Bingo
+
+Game Summary: The main panel of the Bingo game is a n*n matrix, called Clue Matrix. Each cell of this n*n matrix is filled with names of dishes, like 'Peking Duck'. 
+
+Each round the players in the same team choose one cell and search for the relevant place of the dish. For instance, you may need to zoom in Peking to find a picture 
+
+of 'Peking Duck' on the map in order to occupy the cell of 'Peking Duck'. After you click the right picture successfully, you will be re-directed to the main panel, and
+
+the cell of 'Peking Duck' will be occupied by your team and every player in the game will be notified. The goal of the game is to achieve a BINGO, which means a column, 
+
+a row or a diagonal is entirely occupied by your team. All players in one team should collaborate to achive one BINGO and simultaneously impede other teams’ BINGO. 
+
+The first team that achieves BINGO wins. When the time is out or the Clue Matrix is all filled with occupied cells and no team achieves BINGO, the team that occupies 
+
+the most cells wins.
+
+
+Design Preprocess:
+
+Assuption: The number of teams is M, and the number of players in each team is equivalent and the value is N.
+
+The size of the matrix is determined by M and N. We assume that one needs to spend around 1 minute to find one dish in average. The specification requires the game to 
+
+be played in 15-20 minutes. So in our design, we need to create a Clue Matrix which is [2sqrt(M*N)] *[2sqrt(M*N)] (The side length is approximately determined by
+
+ the probability success to complete the Dish Bingo and the probability fail to complete it multiplies its corresponding completed cell numbers).
+
+Game Rules:
+
+1.      This Dish Bingo game requires at least 2 teams, and the players in each team should be equivalent and the number of players is unbounded.
+
+2.      Each team will choose one color to represent themselves before starting the stopwatch.
+
+3.      The game sever will automatically create a  [2sqrt(M*N)] *[2sqrt(M*N)] Clue Matrix for all the team.
+
+
+4.      According to the Clue Matrix given by the game sever, each team should plan their own BINGO path and try to impede others’ BINGO. BINGO means that one team 
+
+achieves one column, one row or one diagonal occupied with its selected color. 
+
+5.      When one team wants to occupy one dish cell in Clue Matrix with their own color, it needs at least  [N/3 +1] players to find and click the corresponding dish picture 
+
+in the map. The team which first accomplishes the above requirements will solely occupy this dish cell with their own color except 4 ends in the Clue Matrix. This 4 ends 
+
+can be occupied jointly in order to improve the probability of realizing BINGO. When one cell is occupied, it will turn to be its team’s color and each player in the game
+
+will be notified.
+
+6.      Players in one team should and can communicate with each other. They should assign different find tasks to each player and dynamically change their BINGO plan
+
+according the situation happened in the game.
+
+Victory Standard:
+
+1.      When one team achieves BINGO, it will be the winner successively. And remaining teams will continue trying to accomplish BINGO.
+
+2.     When no one achieves BINGO, the rank is determined by the number of dish cells which your team has occupied then the game is over.
+
+3.    If the time is out (20 minutes), the remaining team will be ranked according to the number of dish cells which it has occupied. The more you occupy, the higher rank 
+
+you will get. And the game is over.​
+
+
+
+2. UML diagram of the interfaces and implementing classes​.
+
+
+You can find the UML diagram in our SVN. UML diagram is in the root folder.
+
+
+
+3. Prose description of how your design will implement the required common API as well as any features specific to your 
+
+implementation.   The above UML diagram may be imbedded in this document if desired (recommended!)​.
+
+Our design is based on HW08. In which, we convert chatrooms into teams.Because the final API is not actually ensured now, we use API of HW08.Differently from HW08, we seperately
+
+implement the client and the server.By using unknown message, we send game MVC.
+
+4. Javadocs for the classes and interfaces in the UML diagram.   A minimum detail level of class/interface and method 
+descriptions is required.   Descriptions of fields and input parameters is recommended but not required.   The Javadocs 
+should be in the form of HTML web pages so they can be easily read, not just the comments in the code.​
+Javadoc is in the SVN, named doc in the root folder of our project.
+
+5. The submitted code should have a minimum functionality of being able to connect to other users and display a map 
+plus any agreed upon functionality as detailed in the Piazza discussions, if any.​
+Now our server should create team between accept join request. And once the server press "Start Game", it broadcasts the game MVC to the connected players.
+
+

@@ -1,0 +1,47 @@
+package dw35_wz23.server.game.model;
+
+import java.io.Serializable;
+
+public class Dish implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6629486822575856493L;
+	private String name;
+	double latitude;
+	double longitude;
+	double elevation;
+	
+	public Dish(String n, double latitude, double longitude, double elevation){
+		name = n;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.elevation = elevation;
+	}
+	
+	public double getLatitude() {
+		return latitude;
+	}
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+	public double getLongitude() {
+		return longitude;
+	}
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+	public double getElevation() {
+		return elevation;
+	}
+	public void setElevation(double elevation) {
+		this.elevation = elevation;
+	}
+
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+}

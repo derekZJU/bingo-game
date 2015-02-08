@@ -1,0 +1,16 @@
+package dw35_wz23;
+
+import map.MapPanel;
+import dw35_wz23.server.game.controller.GameController;
+import dw35_wz23.server.view.ComponentShowCaseDlg;
+
+public class Test {
+	public static void main(String[] args){
+		GameController gc = new GameController();
+		gc.start();
+//		MapPanel mp = new MapPanel();
+//		ComponentShowCaseDlg dlg = new ComponentShowCaseDlg("test", mp);
+//		dlg.setVisible(true);	
+
+	}
+}

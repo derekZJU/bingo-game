@@ -1,0 +1,637 @@
+package dw35_wz23.server.model;
+
+import java.awt.Color;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import provided.datapacket.DataPacket;
+import provided.rmiUtils.IRMIUtils;
+import provided.rmiUtils.IRMI_Defs;
+import provided.rmiUtils.RMIUtils;
+import provided.util.IVoidLambda;
+import dw35_wz23.server.chatroom.controller.ChatroomController;
+import dw35_wz23.server.chatroom.model.Chatroom;
+import dw35_wz23.server.chatroom.model.ChatroomModel;
+import dw35_wz23.server.controller.ServerController;
+import common.IChatroom;
+import common.IPerson;
+
+/**
+ * The model of the chat room.
+ * 
+ * @author dw35, wz23
+ *
+ */
+public class ServerModel {
+	/**
+	 * The RMI Registry.
+	 */
+	private Registry registry;
+	/**
+	 * My IPerson stub.
+	 */
+	private IPerson myPersonStub = new Person("Di Wu");
+	/**
+	 * arraylist contains the chatroom
+	 */
+	private ArrayList<ChatroomController> chatroomControllerList = new ArrayList<ChatroomController>();
+
+	/**
+	 * Get the chat room list
+	 * 
+	 * @return The arraylist containing the chatroom
+	 */
+	public ArrayList<ChatroomController> getChatroomList() {
+		return chatroomControllerList;
+	}
+
+	/**
+	 * The view adapter;
+	 */
+	private IModel2ViewAdapter m2vAdapter;
+	/**
+	 * the username of current user
+	 */
+	private String userName;
+	/**
+	 * Output command used to put multiple strings up onto the view.
+	 */
+	
+	private int[] matrix = new int[64];
+	
+	private IVoidLambda<String> outputCmd = new IVoidLambda<String>() {
+		@Override
+		public void apply(String... params) {
+			for (String s : params) {
+				System.err.println(s);
+				// view.append(s + "\n");
+			}
+		}
+	};
+
+	/**
+	 * Factory for the Registry and other uses.
+	 */
+	IRMIUtils rmiUtils = new RMIUtils(outputCmd);
+
+	/**
+	 * constructor of model
+	 * 
+	 * @param view
+	 *            The adapter to the view.
+	 */
+	public ServerModel(IModel2ViewAdapter view) {
+		this.m2vAdapter = view;
+		initMatrix();
+	}
+
+	/**
+	 * Start the model.
+	 */
+	public void start() {
+		/*
+		 * Set the timeout of RMI. In case the IP address is dead.
+		 */
+		rmiUtils.startRMI(IRMI_Defs.CLASS_SERVER_PORT_SERVER);
+		try {
+			/* Should this port number be specified in the API? */
+			IPerson stub = (IPerson) UnicastRemoteObject.exportObject(
+					myPersonStub, 2101);
+			registry = rmiUtils.getLocalRegistry();
+			registry.rebind(IPerson.SERVER_BOUND_NAME, stub);
+		} catch (Exception e) {
+			System.err.println("Server exception:" + "\n");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		// //initialize visitor
+		// initVisitor();
+	}
+
+	/**
+	 * Stops the EngineModel by unbinding the ComputeEngine from the Registry
+	 * and stopping class file server.
+	 */
+	public void stop() {
+		try {
+			registry.unbind(IPerson.SERVER_BOUND_NAME);
+			System.out.println("Person: " + IPerson.SERVER_BOUND_NAME
+					+ " has been unbound.");
+			rmiUtils.stopRMI();
+			System.exit(0);
+		} catch (Exception e) {
+			System.err.println("EngineController: Error unbinding "
+					+ IPerson.SERVER_BOUND_NAME + ":\n" + e);
+			System.exit(-1);
+		}
+	}
+
+	/**
+	 * Get a user's IPerson stub according to the IP address.
+	 * 
+	 * @param ip
+	 *            The IP address of the user.
+	 * @return The IPerson stub. Null if no stub found.
+	 */
+	public IPerson getPersonStub(String ip) {
+		try {
+			Registry registry = rmiUtils.getRemoteRegistry(ip);
+			return (IPerson) registry.lookup(IPerson.CLIENT_BOUND_NAME);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * Send request to a user according to the IP address.
+	 * 
+	 * @param ip
+	 *            The IP address.
+	 * @return The status code.
+	 */
+	public int sendRequest(String ip) {
+		try {
+			IPerson thatPerson = getPersonStub(ip);
+			thatPerson.recvRequest(myPersonStub);
+			return IPerson.STATUS_SUCC;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return IPerson.STATUS_FAILED;
+		}
+	}
+
+	/**
+	 * Send invitation to a user.
+	 * 
+	 * @param thatPerson
+	 *            The IPerson stub of the user.
+	 * @param chatroom
+	 *            The IChatroom object.
+	 * @return The status code.
+	 */
+	public int sendInvitation(IPerson thatPerson, IChatroom chatroom) {
+		try {
+			return thatPerson.acceptInvitation(chatroom);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return IPerson.STATUS_FAILED;
+		}
+	}
+
+	/**
+	 * Create a chat room.
+	 */
+	public void createChatroom() {
+		String newName = JOptionPane
+				.showInputDialog("Please input your Chatroom Name");
+		if (newName == null || newName == "")
+			newName = "DefaultChatroom" + (int) (Math.random() * 10000);
+		IChatroom chatroom = new Chatroom(newName);
+		addChatroom(chatroom);
+
+	}
+	
+	/**
+	 * create a lobby
+	 */
+	public void createLobby() {
+		String newName = "Bingo Lobby";
+		IChatroom chatroom = new Chatroom(newName);
+		addChatroom(chatroom);
+
+	}
+	
+	/**
+	 * create a team
+	 * @param teamName 
+	 *                 the name of the team
+	 */
+	public void createTeam(String teamName) {
+		String newName = teamName + "Server";
+		IChatroom chatroom = new Chatroom(teamName);
+		addTeam(chatroom, newName);
+
+	}
+
+	/**
+	 * Add a chat room
+	 * 
+	 * @param chatroom
+	 *            chatroom object
+	 * @return chatroom controller object
+	 */
+	public ChatroomController addChatroom(IChatroom chatroom) {
+		// new MiniMVC, with a new Member() in model
+		ChatroomController newController = new ChatroomController(chatroom,
+				"BingoServer");
+		newController.start();
+		newController.getMiniModel().getChatroom()
+				.addMember(newController.getMiniModel().getMember());
+		chatroomControllerList.add(newController);
+		newController.getMiniModel().updateMemberList();
+		m2vAdapter.addChatroomToList(chatroom);
+		return newController;
+	}
+	
+	/**
+	 * Add a team
+	 * 
+	 * @param chatroom
+	 *            chatroom object
+	 * @return chatroom controller object
+	 */
+	public ChatroomController addTeam(IChatroom chatroom, String teamName) {
+		// new MiniMVC, with a new Member() in model
+		ChatroomController newController = new ChatroomController(chatroom,
+				teamName);
+		newController.start();
+		newController.getMiniModel().getChatroom()
+				.addMember(newController.getMiniModel().getMember());
+		chatroomControllerList.add(newController);
+		newController.getMiniModel().updateMemberList();
+		m2vAdapter.addChatroomToList(chatroom);
+		return newController;
+	}
+	
+	/**
+	 * remove a chatroom
+	 * @param chatroom
+	 *                IChatroom object
+	 */
+	public void removeChatroom(IChatroom chatroom){
+		ArrayList<ChatroomController> list = ServerController.getInstance().getAppModel().getChatroomList();
+		ChatroomController leftController = new ChatroomController(chatroom, userName);
+		int deleteFlag = 0;
+		for(ChatroomController c : list){
+			if(c.getMiniModel().getChatroom().getUUID() == chatroom.getUUID()){
+				leftController = c;
+				deleteFlag = 1;
+			}
+		}
+		if(deleteFlag==1){
+			list.remove(leftController);
+		}
+	}
+
+	/**
+	 * Set the user name
+	 * 
+	 * @param name
+	 *            the username of current user.
+	 */
+	public void setUsername(String name) {
+		userName = name;
+	}
+
+	/**
+	 * get the user name
+	 * 
+	 * @return the username of current user.
+	 */
+	public String getUsername() {
+		return userName;
+	}
+
+	/**
+	 * get the IP address of current user.
+	 * 
+	 * @return the IP address of current user.
+	 */
+	public String getLocalIP() {
+		try {
+			return rmiUtils.getLocalAddress();
+		} catch (SocketException e) {
+			e.printStackTrace();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		return "RMI error";
+	}
+
+	
+	/**
+	 * Quit the app.
+	 */
+	public void quitApp(){
+		for (ChatroomController c : chatroomControllerList){
+			c.getMiniModel().sendLeaveMsg();
+		}
+	}
+
+	/**
+	 * send the start message to both the team1 and team2
+	 */
+	public void sendStart() {
+		sendStart2Team1();
+		sendStart2Team2();		
+	}
+	
+	/**
+	 * send the start message to start team1 
+	 */
+	public void sendStart2Team1(){
+		ChatroomModel miniModel = chatroomControllerList.get(1).getMiniModel();
+		miniModel.sendMessage(new DataPacket<InstallMsg>(InstallMsg.class, miniModel.getMember(), new InstallMsg(1)));
+	}
+	
+	/**
+	 * send the start message to start team2
+	 */
+	public void sendStart2Team2(){
+		ChatroomModel miniModel = chatroomControllerList.get(2).getMiniModel();
+		miniModel.sendMessage(new DataPacket<InstallMsg>(InstallMsg.class, miniModel.getMember(), new InstallMsg(2)));
+	}
+	
+	/**
+	 * initiate the food Matrix
+	 */
+	public void initMatrix(){
+		for(int i = 0; i<64; i++){
+			matrix[i] = 0;
+		}
+	}
+	
+	/**
+	 * get the food matrix
+	 * @return
+	 *        matrix arraya
+	 */
+	public int[] getMatrix(){
+		return matrix;
+	}
+	
+	/**
+	 * set the food matrix
+	 * @param newMatrix  
+	 *                 matrix array
+	 */
+	public void setMatrix(int[] newMatrix){
+		matrix = newMatrix;
+	}
+	
+	/**
+	 * update the food matrix
+	 * @param team  the index number of the team
+	 * @param index the index number of the corresponding food
+	 */
+	public void updateMatrix(int team, int index){
+		System.out.println("now start update Matrix in the server");
+		int status = matrix[index];
+
+		if(index == 0 || index == 7 || index == 56 || index == 63){
+			switch(status)
+			{
+				case 0:
+				{
+					matrix[index] = team;
+					break;
+				}
+				case 1:
+				{
+					if(team != 1){
+					matrix[index] = 3; // 3 represents both
+					}
+					break;
+				}
+				case 2:
+				{
+					if(team != 2){
+					matrix[index] = 3;
+					}
+					break;
+				}
+				case 3:
+				{
+					matrix[index] = 3;
+					break;
+				}
+				default: break;
+			}
+		}
+		else{
+			if(status == 0){
+				matrix[index] = team;
+			}
+		}
+		sendUpdate(matrix);
+		checkEnd();
+	}
+	
+	/**
+	 * to check whether the game is end or not
+	 */
+	public void checkEnd(){
+		int result = checkBingo(matrix);
+		if(result != 0)
+		{
+			sendEnd(result);
+		}
+		
+		else if(checkFull(matrix) != 0){
+			sendEnd(checkFull(matrix));
+		}		
+	}
+	
+	/**
+	 * send the update message to update the matrix
+	 * @param matrix   the matrix array
+	 */
+	public void sendUpdate(int[] matrix){
+		for(int i=1; i<3; i++){
+			ChatroomModel miniModel = chatroomControllerList.get(i).getMiniModel();
+			miniModel.sendMessage(new DataPacket<UpdatePanelMsg>(UpdatePanelMsg.class, miniModel.getMember(), new UpdatePanelMsg(matrix)));
+		}
+	}
+	
+	/**
+	 * check whether the matrix is full or not
+	 * @param matrix 
+	 *              the matrix array
+	 * @return the status of the matrix
+	 */
+	public int checkFull(int[] matrix){
+		int numberOfteam1 = 0;
+		int numberOfteam2 = 0;
+		
+		int i = 0;
+		while(matrix[i] != 0){
+			if (matrix[i] == 1){
+				numberOfteam1++;
+			}
+			else if (matrix[i] == 2){
+				numberOfteam2++;
+			}
+			else{
+				numberOfteam1++;
+				numberOfteam2++;
+			}
+			i++;
+		}
+		
+		if (numberOfteam1 + numberOfteam2 >= 64){
+			if(numberOfteam1 > numberOfteam2){
+				return 1;
+			}
+			else if (numberOfteam1 < numberOfteam2){
+				return 2;
+			}
+			else return 4;
+		}
+		else 
+			return 0;
+	}
+	
+	/**
+	 * check whether the matrix reaches Bingo or not
+	 * @param matrix the matrix array
+	 * @return the status of the matrix Bingo
+	 */
+	public int checkBingo(int[] matrix){
+		//check row
+		for(int i = 0; i < 63; i+=8){
+			if(
+					(matrix[i]==2||matrix[i]==3)&&
+					(matrix[i+1]==2||matrix[i+1]==3)&&
+					(matrix[i+2]==2||matrix[i+2]==3)&&
+					(matrix[i+3]==2||matrix[i+3]==3)&&
+					(matrix[i+4]==2||matrix[i+4]==3)&&
+					(matrix[i+5]==2||matrix[i+5]==3)&&
+					(matrix[i+6]==2||matrix[i+6]==3)&&
+					(matrix[i+7]==2||matrix[i+7]==3)
+					)
+			{
+				return 2;
+			}
+			if(
+					(matrix[i]==1||matrix[i]==3)&&
+					(matrix[i+1]==1||matrix[i+1]==3)&&
+					(matrix[i+2]==1||matrix[i+2]==3)&&
+					(matrix[i+3]==1||matrix[i+3]==3)&&
+					(matrix[i+4]==1||matrix[i+4]==3)&&
+					(matrix[i+5]==1||matrix[i+5]==3)&&
+					(matrix[i+6]==1||matrix[i+6]==3)&&
+					(matrix[i+7]==1||matrix[i+7]==3)
+					)
+			{
+				return 1;
+			}
+		}
+		
+		//check column
+		for(int i=0; i<8; i++){
+			if(
+					(matrix[i]==2||matrix[i]==3)&&
+					(matrix[i+8]==2||matrix[i+8]==3)&&
+					(matrix[i+16]==2||matrix[i+16]==3)&&
+					(matrix[i+24]==2||matrix[i+24]==3)&&
+					(matrix[i+32]==2||matrix[i+32]==3)&&
+					(matrix[i+40]==2||matrix[i+40]==3)&&
+					(matrix[i+48]==2||matrix[i+48]==3)&&
+					(matrix[i+56]==2||matrix[i+56]==3)
+					)
+			{
+				return 2;
+			}
+			if(
+					(matrix[i]==1||matrix[i]==3)&&
+					(matrix[i+8]==1||matrix[i+8]==3)&&
+					(matrix[i+16]==1||matrix[i+16]==3)&&
+					(matrix[i+24]==1||matrix[i+24]==3)&&
+					(matrix[i+32]==1||matrix[i+32]==3)&&
+					(matrix[i+40]==1||matrix[i+40]==3)&&
+					(matrix[i+48]==1||matrix[i+48]==3)&&
+					(matrix[i+56]==1||matrix[i+56]==3)
+					)
+			{
+				return 1;
+			}
+		}
+		
+		//check diagonal
+		if(
+				(matrix[0]==2||matrix[0]==3)&&
+				(matrix[9]==2||matrix[9]==3)&&
+				(matrix[18]==2||matrix[18]==3)&&
+				(matrix[27]==2||matrix[27]==3)&&
+				(matrix[36]==2||matrix[36]==3)&&
+				(matrix[45]==2||matrix[45]==3)&&
+				(matrix[54]==2||matrix[54]==3)&&
+				(matrix[63]==2||matrix[63]==3)
+				)
+		{
+			return 2;
+		}
+		if(
+				(matrix[0]==1||matrix[0]==3)&&
+				(matrix[9]==1||matrix[9]==3)&&
+				(matrix[18]==1||matrix[18]==3)&&
+				(matrix[27]==1||matrix[27]==3)&&
+				(matrix[36]==1||matrix[36]==3)&&
+				(matrix[45]==1||matrix[45]==3)&&
+				(matrix[54]==1||matrix[54]==3)&&
+				(matrix[63]==1||matrix[63]==3)
+				)
+		{
+			return 1;
+		}
+		if(
+				(matrix[7]==2||matrix[7]==3)&&
+				(matrix[14]==2||matrix[14]==3)&&
+				(matrix[21]==2||matrix[21]==3)&&
+				(matrix[28]==2||matrix[28]==3)&&
+				(matrix[35]==2||matrix[35]==3)&&
+				(matrix[42]==2||matrix[42]==3)&&
+				(matrix[49]==2||matrix[49]==3)&&
+				(matrix[56]==2||matrix[56]==3)
+				)
+		{
+			return 2;
+		}
+		if(
+				(matrix[7]==1||matrix[7]==3)&&
+				(matrix[14]==1||matrix[14]==3)&&
+				(matrix[21]==1||matrix[21]==3)&&
+				(matrix[28]==1||matrix[28]==3)&&
+				(matrix[35]==1||matrix[35]==3)&&
+				(matrix[42]==1||matrix[42]==3)&&
+				(matrix[49]==1||matrix[49]==3)&&
+				(matrix[56]==1||matrix[56]==3)
+				)
+		{
+			return 1;
+		}
+		
+		return 0;
+		
+	}
+	
+	/**
+	 * send the end message to end the game
+	 * @param res the index number of the team
+	 */
+	public void sendEnd(int res){
+		ChatroomModel miniModel = chatroomControllerList.get(0).getMiniModel();
+		JPanel endPanel = new JPanel();
+		endPanel.add(new JLabel("Congratulation!!! Team"+res+" wins"));
+		endPanel.setSize(250, 250);
+		endPanel.setBackground(Color.pink);
+		miniModel.sendMessage(new DataPacket<AddComponentMsg>(AddComponentMsg.class, 
+				miniModel.getMember(), 
+				new AddComponentMsg("Game Ending", endPanel)));
+	}
+	
+	/**
+	 * send end time to the lobby
+	 */
+	public void endTime(){
+		sendEnd(0);
+	}
+}

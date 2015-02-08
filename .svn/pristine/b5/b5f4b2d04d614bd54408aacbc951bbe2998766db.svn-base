@@ -1,0 +1,46 @@
+package dw35_wz23.server.view;
+
+import java.util.ArrayList;
+
+import common.IChatroom;
+import dw35_wz23.server.chatroom.controller.ChatroomController;
+/**  
+ * Adapter the view uses to communicate to the model
+ */
+public interface IView2ModelAdapter {
+
+	
+	/**
+	 * Send invitation to join chat root to a user.
+	 * @param ip The IP address of the user.
+	 * @return The status code. IPerson.STATUS_SUCC or IPerson.STATUS_FAILED.
+	 */
+	int sendRequest(String ip);
+	
+	
+	/**
+	 * create chat room
+	 */
+	void createChatroom();
+	/**
+	 * get chat room list
+	 * @return chat room list 
+	 */
+	ArrayList<ChatroomController> getChatroomList();
+	/**
+	 * add chat room 
+	 * @param chatroom chat room object
+	 * @return chat room controller
+	 */
+	ChatroomController addChatroom(IChatroom chatroom);
+	/**
+	 * send invitation
+	 * @param iP user IP 
+	 * @param chatroom chat room object
+	 */
+	void sendInvitation(String iP, IChatroom chatroom);
+
+
+	void sendStart();
+	
+}

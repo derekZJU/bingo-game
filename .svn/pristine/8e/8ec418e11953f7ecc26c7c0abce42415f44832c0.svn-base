@@ -1,0 +1,16 @@
+package dw35_wz23.server.chatroom.model;
+
+import provided.datapacket.ADataPacket;
+import provided.datapacket.DataPacketAlgo;
+/**
+ * Adapter from member to model
+ * @author Derek
+ *
+ */
+public interface IMember2ModelAdapter {
+	/**
+	 * getter of the visitor algo
+	 * @return	the visitor
+	 */
+	public DataPacketAlgo<ADataPacket, Void> getVisitor();
+}

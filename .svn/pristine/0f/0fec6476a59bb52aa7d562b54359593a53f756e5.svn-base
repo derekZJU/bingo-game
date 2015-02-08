@@ -1,0 +1,27 @@
+package dw35_wz23.server.model;
+
+import java.io.Serializable;
+
+/**
+ * 
+ * @author dw35, wz23
+ *
+ */
+public class UpdatePanelMsg implements Serializable{
+
+	private static final long serialVersionUID = 6904128614705504363L;
+	int[] matrix;
+	
+	public UpdatePanelMsg(int[] m){
+		matrix = m;
+	}
+
+	public int[] getMatrix() {
+		return matrix;
+	}
+
+	public void setMatrix(int[] matrix) {
+		this.matrix = matrix;
+	}
+	
+}

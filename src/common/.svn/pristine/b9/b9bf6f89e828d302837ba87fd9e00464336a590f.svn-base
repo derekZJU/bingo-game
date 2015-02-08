@@ -1,0 +1,46 @@
+package common;
+
+import java.awt.Component;
+
+import provided.mixedData.IMixedDataDictionary;
+
+
+/**
+ * Interface between a the ChatApp model and algorithm Commands.
+ * This interface helps define the accessibility to the model that one command can have.
+ * Thus, this interface should be implemented in the model.
+ */
+public interface ICmd2ModelAdapter {	
+	
+	/**
+	 * [Colin:] the API of ICmd2ModelAdpt at this point, I think, is just incorrect. 
+	 * Since cmd2model adptr serves as an bridge between cmd and model. it must support the whatever methods
+	 * model has. So it basically should have the same interface with the model.
+	 */
+	/**
+	 * Append a string which eventually will be displayed on the GUI
+	 * When implemented in the model, the model should decide where and how this string is going to be displayed
+	 * @param s	The String to display
+	 */
+	public abstract void append(String s);
+
+	/**
+	 * Add a new component data to the model and sent to the view and eventually get displayed.
+	 * The model might need to determine how to verify the validity of this component.
+	 * @param name 			A name to use when displaying the new component
+	 * @param newComponent	The new awt.component to be added
+	 */
+	public abstract void addComponent(String name, Component newComponent);
+
+
+	/**
+	 * Allows the remotely-sourced message-processing command to access the local IMember stub
+	 * @return IMember The local IMember stub
+	 */
+	public abstract IMember getLocalMember();
+	
+	public IMixedDataDictionary getDataDict();
+
+	
+	
+}

@@ -1,0 +1,140 @@
+package dw35_wz23.server.game.view;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+
+import map.MapPanel;
+import dw35_wz23.client.controller.ClientController;
+import dw35_wz23.server.chatroom.view.IChatView2ModelAdapter;
+
+import javax.swing.JTable;
+
+import java.awt.GridLayout;
+
+public class GameView extends JFrame implements Serializable{
+	private static final long serialVersionUID = 3335681412100562629L;
+	public JPanel contentPanel;
+	public DefaultListModel<String> memberListModel;
+	private JButton LeaveChatroomButton;
+	private JLabel lblChatRoom;
+	transient private IChatView2ModelAdapter chatModel;
+//	private JPanel centerPanel;
+	private MapPanel mapPanel = new MapPanel();
+	private JTable table;
+	/**
+	 * constructor of the view
+	 * @param iChatView2ModelAdapter	adapter from view to model
+	 */
+	public GameView() {	
+		init();
+	}
+	/**
+	 * initial operations when starting the mini GUI
+	 */
+	public void init(){
+		setBounds(100, 100, 1600, 460);
+		contentPanel = new JPanel();
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPanel.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPanel);
+		contentPanel.setLayout(new BorderLayout(0, 0));	
+		
+		/*East*/
+		JPanel cluePanel = new JPanel();		
+		cluePanel.setLayout(new BorderLayout(0, 0));
+		memberListModel = new DefaultListModel<String>();
+		JLabel clueLabel = new JLabel("Clue Matrix");
+		clueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		cluePanel.add(clueLabel, BorderLayout.SOUTH);
+		JPanel matrixPanel = new JPanel();
+		cluePanel.add(matrixPanel, BorderLayout.CENTER);
+		matrixPanel.setLayout(new GridLayout(8, 8, 1, 1));
+//		Dimension dm = new Dimension();
+//		dm.setSize(50, 50);
+//		matrixPanel.setSize(dm);
+		String[] stringArray = {
+				"Pecking<br> Duck","Dongpo<br> Pork","Kung Pao<br> Chicken","Sushi","Tom Yam<br> Kung","Doner<br> Meat","Norwegian<br> Salmon","Puff",
+				"Tempura","Sashimi","Kimchi","Cold<br> Noodle","Vodka","Wienerbroed","Kottbullar","Belgian<br> Chocolate",
+				"Hainanese<br> Chicken<br> Rice","Brownie","Macaron","Taco","Borscht","Kobe<br> Beef","Scampi","Souffle",
+				"Vietnamese<br> Pho","Naan<br> Bread","Baked<br> Frech<br> Snails","Bak Kut<br> Teh","Kvass","Yerba<br> Mate","Tortilla","Bacalhau",
+				"French<br> Fries","Indian<br> Curry","Miso<br> Soup","Kimbab","Ice Wine","Subway","Apple<br> Pie","Cart<br> Noodles",
+				"Chinese<br> Hot Pot","Oyster<br> Omelet","Pasta","Barbecued<br> Roasted<br> Gooes","Maple<br> Syrup","Mango<br> Sticky<br> Rice","Buffalo<br> Wings","Roast<br> Whole<br> Lamb",
+				"Hamburger","Dark Beer","Seafood<br> Paella","Foie Gras","King<br> Crab","Egg<br> Tarts","Omurice","Udon",
+				"Onion<br> Soup","Pork<br> Trotters","Bratwurst","Truffes<br> Chocolate","Feijoada","Satay","Tiramisu","Vietnam<br> Spring<br> Roll"
+		};
+		
+		List<String> list = Arrays.asList(stringArray);
+		Collections.shuffle(list);
+		String[] foodMatrix = (String[])list.toArray(new String[list.size()]);
+		
+		ArrayList<JLabel> labelArray = new ArrayList<JLabel>();
+		for(int i = 0; i<64; i++){
+//			"<html>Create a multimedia <br>PowerPoint presentation to</html>"
+			JLabel newLabel = new JLabel("<html>"+foodMatrix[i]+"</html>");
+			newLabel.setBorder(BorderFactory.createLineBorder(Color.RED));
+			newLabel.setOpaque(true);
+			newLabel.setBackground(Color.gray);
+			labelArray.add(newLabel);
+		}
+		for(int i = 0; i < 64; i++){
+			matrixPanel.add(labelArray.get(i));
+		}
+		
+		/*North*/
+		JPanel toolPanel = new JPanel();
+		toolPanel.setLayout(new BorderLayout(0, 0));		
+		lblChatRoom = new JLabel("Dish Bingo");
+		lblChatRoom.setToolTipText("chatroom name");
+		lblChatRoom.setHorizontalAlignment(SwingConstants.CENTER);
+		toolPanel.add(lblChatRoom, BorderLayout.CENTER);		
+		LeaveChatroomButton = new JButton("Leave Game");
+		LeaveChatroomButton.setToolTipText("button for leaving chatroom");
+		toolPanel.add(LeaveChatroomButton, BorderLayout.EAST);
+		LeaveChatroomButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				chatModel.getChatroom().removeMember(chatModel.getMember());
+				chatModel.sendLeaveMessage();
+				ClientController.getInstance().getAppModel().removeChatroom(chatModel.getChatroom());
+				ClientController.getInstance().getAppView().removeChatroom();
+			}
+		});
+		
+		contentPanel.add(toolPanel, BorderLayout.NORTH);
+		contentPanel.add(cluePanel, BorderLayout.EAST);
+		contentPanel.add(mapPanel, BorderLayout.CENTER);
+		
+	}
+	/**
+	 * starting operation of the view
+	 */
+	public void start() {
+		mapPanel.start();
+		System.out.println("map panel start");
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+			    setVisible(true);
+			}	
+		});
+		//setVisible(true);
+	}
+}

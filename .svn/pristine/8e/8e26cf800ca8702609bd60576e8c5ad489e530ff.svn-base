@@ -1,0 +1,42 @@
+package dw35_wz23.server.game.model;
+
+import java.io.Serializable;
+
+import common.IMember;
+
+public class GameModel implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3391459558942258062L;
+	IGameModel2ViewAdapter _adpt;
+	IMember serverStub;
+	
+	public IMember getServerStub() {
+		return serverStub;
+	}
+
+	public void setServerStub(IMember serverStub) {
+		this.serverStub = serverStub;
+	}
+
+	public GameModel(IGameModel2ViewAdapter adpt) {
+		_adpt = adpt;
+	}
+	
+	public void start() {
+
+//		_adpt.addPlace(new Place("Greenwich", Position.fromDegrees(51.477222, 0.0, 1000)));
+//
+//		_layer.addToggleAnnotation("Willy", "Willy Selected!", willy);
+//		_layer.addToggleAnnotation("Epcot Center", "Epcot Selected!", epcot, 5000, 1000000);
+//		_layer.addAnnotation(new GlobeAnnotation("NYC", nyc));
+//		_layer.addRenderable(renderable);
+//		_adpt.show(_layer);
+	}
+
+	public void sendUpdate(int l) {
+		
+	}
+
+}

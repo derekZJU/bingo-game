@@ -1,0 +1,7 @@
+package dw35_wz23.server.chatroom.model;
+
+import common.ISuccessMsg;
+
+public class SuccessMsg implements ISuccessMsg{
+
+}

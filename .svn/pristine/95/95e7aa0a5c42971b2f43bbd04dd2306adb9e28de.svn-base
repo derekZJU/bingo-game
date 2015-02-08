@@ -1,0 +1,12 @@
+package dw35_wz23.server.model;
+
+import java.io.Serializable;
+
+public class InstallMsg implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6637044128757080515L;
+	
+}

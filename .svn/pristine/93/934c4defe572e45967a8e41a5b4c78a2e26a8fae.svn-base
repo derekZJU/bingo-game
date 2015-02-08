@@ -1,0 +1,25 @@
+package dw35_wz23.client.chatroom.model;
+
+import java.util.Collection;
+
+import javax.swing.JTextArea;
+
+import common.IMember;
+/**
+ * Adapter from model to view of the mini Model
+ * @author dw35,wz23
+ *
+ */
+public interface IChatModel2ViewAdapter {
+	/**
+	 * update the member list that is displayed in the view
+	 * @param collection
+	 */
+	public void updateMemberList(Collection<IMember> collection);
+	/**
+	 * getter of the textArea
+	 * @return the textArea of the view
+	 */
+	public JTextArea getTextArea();
+	
+}

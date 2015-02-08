@@ -1,0 +1,314 @@
+package dw35_wz23.server.model;
+
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import javax.swing.JOptionPane;
+
+import provided.datapacket.ADataPacket;
+import provided.datapacket.ADataPacketAlgoCmd;
+import provided.datapacket.DataPacket;
+import provided.rmiUtils.IRMIUtils;
+import provided.rmiUtils.IRMI_Defs;
+import provided.rmiUtils.RMIUtils;
+import provided.util.IVoidLambda;
+import dw35_wz23.server.chatroom.controller.ChatroomController;
+import dw35_wz23.server.chatroom.model.AddCmdMsg;
+import dw35_wz23.server.chatroom.model.Chatroom;
+import dw35_wz23.server.chatroom.model.ChatroomModel;
+import dw35_wz23.server.chatroom.model.InstallCmd;
+import dw35_wz23.server.controller.ServerController;
+import common.IChatroom;
+import common.IPerson;
+import common.ITextMsg;
+
+/**
+ * The model of the chat room.
+ * 
+ * @author dongjuan nian, di wu
+ *
+ */
+public class ServerModel {
+	/**
+	 * The RMI Registry.
+	 */
+	private Registry registry;
+	/**
+	 * My IPerson stub.
+	 */
+	private IPerson myPersonStub = new Person("Di Wu");
+	/**
+	 * arraylist contains the chatroom
+	 */
+	private ArrayList<ChatroomController> chatroomControllerList = new ArrayList<ChatroomController>();
+
+	/**
+	 * Get the chat room list
+	 * 
+	 * @return The arraylist containing the chatroom
+	 */
+	public ArrayList<ChatroomController> getChatroomList() {
+		return chatroomControllerList;
+	}
+
+	/**
+	 * The view adapter;
+	 */
+	private IModel2ViewAdapter m2vAdapter;
+	/**
+	 * the username of current user
+	 */
+	private String userName;
+	/**
+	 * Output command used to put multiple strings up onto the view.
+	 */
+	private IVoidLambda<String> outputCmd = new IVoidLambda<String>() {
+		@Override
+		public void apply(String... params) {
+			for (String s : params) {
+				System.err.println(s);
+				// view.append(s + "\n");
+			}
+		}
+	};
+
+	/**
+	 * Factory for the Registry and other uses.
+	 */
+	IRMIUtils rmiUtils = new RMIUtils(outputCmd);
+
+	/**
+	 * constructor of model
+	 * 
+	 * @param view
+	 *            The adapter to the view.
+	 */
+	public ServerModel(IModel2ViewAdapter view) {
+		this.m2vAdapter = view;
+	}
+
+	/**
+	 * Start the model.
+	 */
+	public void start() {
+		/*
+		 * Set the timeout of RMI. In case the IP address is dead.
+		 */
+		rmiUtils.startRMI(IRMI_Defs.CLASS_SERVER_PORT_SERVER);
+		try {
+			/* Should this port number be specified in the API? */
+			IPerson stub = (IPerson) UnicastRemoteObject.exportObject(
+					myPersonStub, 2101);
+			registry = rmiUtils.getLocalRegistry();
+			registry.rebind(IPerson.BOUND_NAME, stub);
+		} catch (Exception e) {
+			System.err.println("Server exception:" + "\n");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		// //initialize visitor
+		// initVisitor();
+	}
+
+	/**
+	 * Stops the EngineModel by unbinding the ComputeEngine from the Registry
+	 * and stopping class file server.
+	 */
+	public void stop() {
+		try {
+			registry.unbind(IPerson.BOUND_NAME);
+			System.out.println("Person: " + IPerson.BOUND_NAME
+					+ " has been unbound.");
+			rmiUtils.stopRMI();
+			System.exit(0);
+		} catch (Exception e) {
+			System.err.println("EngineController: Error unbinding "
+					+ IPerson.BOUND_NAME + ":\n" + e);
+			System.exit(-1);
+		}
+	}
+
+	/**
+	 * Get a user's IPerson stub according to the IP address.
+	 * 
+	 * @param ip
+	 *            The IP address of the user.
+	 * @return The IPerson stub. Null if no stub found.
+	 */
+	public IPerson getPersonStub(String ip) {
+		try {
+			Registry registry = rmiUtils.getRemoteRegistry(ip);
+			return (IPerson) registry.lookup(IPerson.BOUND_NAME);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * Send request to a user according to the IP address.
+	 * 
+	 * @param ip
+	 *            The IP address.
+	 * @return The status code.
+	 */
+	public int sendRequest(String ip) {
+		try {
+			IPerson thatPerson = getPersonStub(ip);
+			thatPerson.recvRequest(myPersonStub);
+			return IPerson.STATUS_SUCC;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return IPerson.STATUS_FAILED;
+		}
+	}
+
+	/**
+	 * Send invitation to a user.
+	 * 
+	 * @param thatPerson
+	 *            The IPerson stub of the user.
+	 * @param chatroom
+	 *            The IChatroom object.
+	 * @return The status code.
+	 */
+	public int sendInvitation(IPerson thatPerson, IChatroom chatroom) {
+		try {
+			return thatPerson.acceptInvitation(chatroom);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return IPerson.STATUS_FAILED;
+		}
+	}
+
+	/**
+	 * Create a chat room.
+	 */
+	public void createChatroom() {
+		String newName = JOptionPane
+				.showInputDialog("Please input your Chatroom Name");
+		if (newName == null || newName == "")
+			newName = "DefaultChatroom" + (int) (Math.random() * 10000);
+		IChatroom chatroom = new Chatroom(newName);
+		System.out.println("after addMember, the memberList is "
+				+ chatroom.getMembers());
+		addChatroom(chatroom);
+
+	}
+
+	/**
+	 * Add a chat room
+	 * 
+	 * @param chatroom
+	 *            chatroom object
+	 * @return chatroom controller object
+	 */
+	public ChatroomController addChatroom(IChatroom chatroom) {
+		// new MiniMVC, with a new Member() in model
+		ChatroomController newController = new ChatroomController(chatroom,
+				getUsername());
+		newController.start();
+		newController.getMiniModel().getChatroom()
+				.addMember(newController.getMiniModel().getMember());
+		chatroomControllerList.add(newController);
+		System.out.println("after add new controller, chatroom controller has "
+				+ chatroomControllerList);
+		newController.getMiniModel().updateMemberList();
+		m2vAdapter.addChatroomToList(chatroom);
+		return newController;
+	}
+	
+	public void removeChatroom(IChatroom chatroom){
+		ArrayList<ChatroomController> list = ServerController.getInstance().getAppModel().getChatroomList();
+		ChatroomController leftController = new ChatroomController(chatroom, userName);
+		int deleteFlag = 0;
+		for(ChatroomController c : list){
+			if(c.getMiniModel().getChatroom().getUUID() == chatroom.getUUID()){
+				leftController = c;
+				deleteFlag = 1;
+			}
+		}
+		if(deleteFlag==1){
+			list.remove(leftController);
+		}
+	}
+
+	/**
+	 * Set the user name
+	 * 
+	 * @param name
+	 *            the username of current user.
+	 */
+	public void setUsername(String name) {
+		userName = name;
+	}
+
+	/**
+	 * get the user name
+	 * 
+	 * @return the username of current user.
+	 */
+	public String getUsername() {
+		return userName;
+	}
+
+	/**
+	 * get the IP address of current user.
+	 * 
+	 * @return the IP address of current user.
+	 */
+	public String getLocalIP() {
+		try {
+			return rmiUtils.getLocalAddress();
+		} catch (SocketException e) {
+			e.printStackTrace();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		return "RMI error";
+	}
+
+	
+	/**
+	 * Quit the app.
+	 */
+	public void quitApp(){
+		for (ChatroomController c : chatroomControllerList){
+			c.getMiniModel().sendLeaveMsg();
+		}
+	}
+
+	public void sendStart() {
+//		Iterator<ChatroomController> it = chatroomControllerList.iterator();
+//		while(it.hasNext()){
+//			ChatroomModel miniModel = it.next().getMiniModel();
+//			miniModel.sendMessage(
+//					new DataPacket<InstallMsg>(InstallMsg.class, miniModel.getMember(), new InstallMsg()));
+//		}
+		for(int i = 0; i<chatroomControllerList.size(); i++){
+			ChatroomModel miniModel = chatroomControllerList.get(i).getMiniModel();
+//			miniModel.sendMessage(new DataPacket<InstallMsg>(InstallMsg.class, miniModel.getMember(), new InstallMsg()));
+			miniModel.sendMessage(new DataPacket<AddCmdMsg>(AddCmdMsg.class, miniModel.getMember(), 
+					new AddCmdMsg(miniModel.getMember(), InstallMsg.class,
+							new InstallCmd()){
+								/**
+								 * 
+								 */
+								private static final long serialVersionUID = 2507666339547040693L;
+				
+			}));
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			miniModel.sendMessage(new DataPacket<InstallMsg>(InstallMsg.class, miniModel.getMember(), new InstallMsg()));		}
+		
+	}
+	
+}

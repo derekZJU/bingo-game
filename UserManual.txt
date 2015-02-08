@@ -1,0 +1,24 @@
+----------User Manual of the Final Project by dw35_wz23----------
+1. How to start the program
+1) Start the program
+Run the main function in the dw35_wz23.server.controller.ServerController.java
+to run the server application. And run the main function in the dw35_wz23.client.controller.ClientController.java
+to start the client application.
+2) Start the game
+After all the players have connected to the server and assigned into two teams, press 'Start'button
+in the server application to start the game.
+
+2. How to connect to other users 
+In the client application, enter the target IP in the input field and press request, an request will be
+sent to the target server, and you can connect to other server in this way.
+
+3. How to use every feature of the program
+Besides what we mentioned above (starting the game and the application, connect to others), in the server
+application, you can assign players to two teams when requested by manually choose a team in the droplist
+and press OK. After you make sure every one is in, you can start the game. And for the client, you can chat
+in the lobby and the team chatroom. Choose a team or a lobby in the left chatroom list, and enter the message
+you want to send in the input field, then simply press 'send' button.
+
+4. How to end and exit the program
+After some team wins or the time is up, every user will receive a dialog to show the result of the game,
+after that, both the server and the client is supposed to terminate the application manually.

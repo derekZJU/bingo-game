@@ -1,0 +1,20 @@
+package dw35_wz23.client.model;
+
+import common.IJoinRoomMsg;
+import common.IMember;
+
+public class JoinRoomMsg implements IJoinRoomMsg{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6005960872436316607L;
+	private IMember member;
+	public JoinRoomMsg(IMember m){
+		member = m;
+	}
+	@Override
+	public IMember getMember() {
+				return member;
+	}
+
+}

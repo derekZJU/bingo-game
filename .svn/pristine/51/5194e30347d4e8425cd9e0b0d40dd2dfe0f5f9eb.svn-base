@@ -1,0 +1,105 @@
+package dw35_wz23.server.game.model;
+
+import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import provided.datapacket.DataPacket;
+import common.IMember;
+import dw35_wz23.client.chatroom.controller.ChatroomController;
+import dw35_wz23.client.controller.ClientController;
+import dw35_wz23.server.model.EndTimeMsg;
+import dw35_wz23.server.model.UpdateMatrixMsg;
+
+public class GameModel implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3391459558942258062L;
+	IGameModel2ViewAdapter _adpt;
+	IMember serverStub;
+	int teamID;
+	Date oriTime = new Date();
+	Timer timer = new Timer();
+	
+	public int getTeamID() {
+		return teamID;
+	}
+
+	public void setTeamID(int teamID) {
+		this.teamID = teamID;
+	}
+
+	public IMember getServerStub() {
+		return serverStub;
+	}
+
+	public void setServerStub(IMember serverStub) {
+		this.serverStub = serverStub;
+	}
+
+	public GameModel(IGameModel2ViewAdapter adpt) {
+		_adpt = adpt;
+	}
+	
+	public void start() {
+		timer.schedule(new TimerTask(){
+
+			@Override
+			public void run() {
+				updateTime();
+				
+			}}, 0, 1000);
+//		_adpt.addPlace(new Place("Greenwich", Position.fromDegrees(51.477222, 0.0, 1000)));
+//
+//		_layer.addToggleAnnotation("Willy", "Willy Selected!", willy);
+//		_layer.addToggleAnnotation("Epcot Center", "Epcot Selected!", epcot, 5000, 1000000);
+//		_layer.addAnnotation(new GlobeAnnotation("NYC", nyc));
+//		_layer.addRenderable(renderable);
+//		_adpt.show(_layer);
+	}
+
+	public void sendUpdate(int l) {
+		try {
+			serverStub.recvMessage(new DataPacket<UpdateMatrixMsg>(UpdateMatrixMsg.class, null, new UpdateMatrixMsg(teamID, l)));
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void updateMatrix(int[] matrix){
+		_adpt.updateLabelArray(matrix);
+	}
+	
+	public void quitApp(){
+		ArrayList<ChatroomController> cList = ClientController.getInstance().getAppModel().getChatroomList();
+		for(ChatroomController c: cList){
+			c.getMiniModel().sendLeaveMsg();
+		}
+		ClientController.getInstance().getAppModel().stop();
+	}
+	
+	public void updateTime(){
+		Date nowTime = new Date();
+		long temp = nowTime.getTime() - oriTime.getTime();
+		int s = (int) ((temp/1000)%60);
+		int m = (int) (temp/1000.0/60);
+		if(m>=15){
+			String timeString = m+" : "+s;
+			_adpt.setTime(timeString);
+			timer.cancel();
+			try {
+				serverStub.recvMessage(new DataPacket<EndTimeMsg>(EndTimeMsg.class, null, new EndTimeMsg()));
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+		else{
+			String timeString = m+" : "+s;
+			_adpt.setTime(timeString);
+		}
+	}
+}

@@ -1,0 +1,30 @@
+package dw35_wz23.server.model;
+
+import java.io.Serializable;
+
+import javax.swing.JComponent;
+
+public class AddComponentMsg implements Serializable{
+
+	private static final long serialVersionUID = -3303553408306238534L;
+	JComponent targetComponent;
+	String componentName;
+	
+	public AddComponentMsg(String componentName, JComponent targetComponent){
+		this.componentName = componentName;
+		this.targetComponent = targetComponent;
+	}
+	
+	public String getComponentName() {
+		return componentName;
+	}
+	public void setComponentName(String componentName) {
+		this.componentName = componentName;
+	}
+	public JComponent getTargetComponent() {
+		return targetComponent;
+	}
+	public void setTargetComponent(JComponent targetComponent) {
+		this.targetComponent = targetComponent;
+	}
+}

@@ -1,0 +1,7 @@
+package dw35_wz23.server.game.view;
+
+import map.MapPanel;
+
+public class MyMapPanel extends MapPanel{
+	
+}

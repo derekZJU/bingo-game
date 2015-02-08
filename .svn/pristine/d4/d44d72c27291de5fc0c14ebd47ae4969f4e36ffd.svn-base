@@ -1,0 +1,26 @@
+package dw35_wz23.server.model;
+
+import java.io.Serializable;
+
+import dw35_wz23.server.game.controller.GameController;
+
+public class InstallMsg implements Serializable{
+	
+
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6637044128757080515L;
+//	private GameController gc;
+//	public InstallMsg(){
+//		gc = new GameController();
+//	}
+//	
+//	public GameController getGc() {
+//		return gc;
+//	}
+//	public void setGc(GameController gc) {
+//		this.gc = gc;
+//	}
+}

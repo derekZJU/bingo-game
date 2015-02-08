@@ -1,0 +1,49 @@
+package dw35_wz23.server.game.controller;
+
+import java.io.Serializable;
+
+import map.MapLayer;
+import dw35_wz23.server.game.model.GameModel;
+import dw35_wz23.server.game.model.IGameModel2ViewAdapter;
+import dw35_wz23.server.game.view.GameView;
+
+public class GameController implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7564654839492567184L;
+	private GameModel model;
+	private GameView view;
+	
+	public GameModel getModel() {
+		return model;
+	}
+
+	public GameView getView() {
+		return view;
+	}
+
+	public GameController(){
+		model = new GameModel(new IGameModel2ViewAdapter(){
+
+			@Override
+			public void show(MapLayer layer) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void hide(MapLayer layer) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		view = new GameView();
+	}
+	
+	public void start() {
+		model.start();
+		view.start();
+	}
+}

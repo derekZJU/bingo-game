@@ -1,0 +1,11 @@
+package dw35_wz23.server.game.model;
+
+import java.io.Serializable;
+
+import map.MapLayer;
+
+public interface IGameModel2ViewAdapter extends Serializable{
+	public void show(MapLayer layer);
+	public void hide(MapLayer layer);
+	public void updateLabelArray(int[] matrix);
+}

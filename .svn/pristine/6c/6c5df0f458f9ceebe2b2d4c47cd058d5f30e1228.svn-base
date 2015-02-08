@@ -1,0 +1,31 @@
+package dw35_wz23.server.game.model;
+
+import java.io.Serializable;
+
+import gov.nasa.worldwind.geom.Position;
+
+public class Dish implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6629486822575856493L;
+	private String name;
+	private Position pos;
+	
+	public Dish(String n, double latitude, double longitude, double elevation){
+		name = n;
+		pos = Position.fromDegrees(latitude, longitude, elevation);
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Position getPos() {
+		return pos;
+	}
+	public void setPos(Position pos) {
+		this.pos = pos;
+	}
+}

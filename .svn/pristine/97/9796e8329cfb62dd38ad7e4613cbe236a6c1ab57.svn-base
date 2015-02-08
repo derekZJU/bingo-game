@@ -1,0 +1,21 @@
+package dw35_wz23.server.model;
+
+import java.io.Serializable;
+
+import dw35_wz23.server.game.model.Dish;
+
+public class DishMsg implements Serializable{
+	private Dish d;
+
+	public DishMsg(String name){
+		d = new Dish(name, 100, 100, 100);
+	}
+	public Dish getD() {
+		return d;
+	}
+
+	public void setD(Dish d) {
+		this.d = d;
+	}
+	
+}

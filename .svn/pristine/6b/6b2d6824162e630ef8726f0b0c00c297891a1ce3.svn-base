@@ -1,0 +1,25 @@
+package dw35_wz23.server.game.controller;
+
+import java.io.Serializable;
+
+import dw35_wz23.server.game.model.GameModel;
+import dw35_wz23.server.game.view.GameView;
+
+public class GameController implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7564654839492567184L;
+	private GameModel model;
+	private GameView view;
+	
+	public GameController(){
+		view = new GameView();
+		model = new GameModel();
+	}
+	
+	public void start() {
+		model.start();
+		view.start();
+	}
+}

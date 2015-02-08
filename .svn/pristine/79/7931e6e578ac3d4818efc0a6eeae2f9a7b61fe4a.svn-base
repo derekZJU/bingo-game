@@ -1,0 +1,23 @@
+package dw35_wz23.server.model;
+
+import java.io.Serializable;
+
+/**
+ * 
+ * @author dw35, wz23
+ *
+ */
+public class InstallMsg implements Serializable{
+	private static final long serialVersionUID = -6637044128757080515L;
+	int teamID;
+	public InstallMsg(int teamID){
+		this.teamID = teamID;
+	}
+	public int getTeamID() {
+		return teamID;
+	}
+	public void setTeamID(int teamID) {
+		this.teamID = teamID;
+	}
+	
+}

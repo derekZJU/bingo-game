@@ -1,0 +1,5 @@
+package dw35_wz23.server.game.view;
+
+public class IPanel2ViewAdapter {
+
+}

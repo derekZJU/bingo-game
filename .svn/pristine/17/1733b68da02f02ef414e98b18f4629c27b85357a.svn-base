@@ -1,0 +1,9 @@
+package dw35_wz23.server.game.model;
+
+import java.io.Serializable;
+
+public class GameModel implements Serializable{
+	public void start(){
+		
+	};
+}

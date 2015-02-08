@@ -1,0 +1,7 @@
+package dw35_wz23.server.game.model;
+
+public class GameModel {
+	public void start(){
+		
+	};
+}

@@ -1,0 +1,67 @@
+package dw35_wz23.server.chatroom.model;
+
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.UUID;
+
+import provided.datapacket.ADataPacket;
+import common.IMember;
+/**
+ * class to define members in the chatroom
+ * @author dw35, wz23
+ *
+ */
+public class Member extends UnicastRemoteObject implements IMember {
+
+	private static final long serialVersionUID = -5176698365156877721L;
+	private String memberName;
+	private IMember2ModelAdapter model;
+	private UUID uuID = UUID.randomUUID();	/**
+	 * constructor of the member
+	 * @param name	member name
+	 * @param adp	adapter from member to the mini Model
+	 * @throws RemoteException
+	 */
+	public Member(String name, IMember2ModelAdapter adp) throws RemoteException{
+		memberName = name;
+		model = adp;
+	}
+	
+	@Override
+	/**
+	 * process receiving message
+	 */
+	public ADataPacket recvMessage(ADataPacket msg) throws RemoteException {
+		if(msg != null){
+			return msg.execute(model.getVisitor());
+//			if(msg.getSender() == null)
+//				return msg.execute(model.getVisitor());
+//			if(!msg.getSender().getName().contains("erver"))
+//				return msg.execute(model.getVisitor());
+		}
+		else
+			System.out.println("null message");
+		return null;
+	}
+	/**
+	 * setter of the adapter from member to model
+	 * @param model
+	 */
+	public void setModel(IMember2ModelAdapter model){
+		this.model = model;
+	}
+	/**
+	 * getter of the member name
+	 */
+	@Override
+	public String getName() throws RemoteException {
+		return memberName;
+	}
+	/**
+	 * getter of the UUId
+	 */
+	@Override
+	public UUID getUUID() throws RemoteException {
+		return uuID;
+	}
+}

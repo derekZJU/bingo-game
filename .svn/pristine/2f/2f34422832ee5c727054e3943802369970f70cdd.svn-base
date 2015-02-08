@@ -1,0 +1,220 @@
+package dw35_wz23.server.game.view;
+
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.layers.RenderableLayer;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.Serializable;
+import java.util.HashMap;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+
+import map.MapLayer;
+import dw35_wz23.server.game.model.Dish;
+
+import java.awt.GridLayout;
+
+public class GameView extends JFrame implements Serializable{
+	private static final long serialVersionUID = 3335681412100562629L;
+	private int MIN_ALTITUDE = 10000;
+	private int MAX_ALTITUDE = 1000000;
+	private IGameView2ModelAdapter _adpt;
+	public JPanel contentPanel;
+	public DefaultListModel<String> memberListModel;
+	private JButton LeaveChatroomButton;
+	private JLabel lblChatRoom;
+	private MyMapPanel mapPanel;
+	Dish[] dishArray = new Dish[64];
+	Dish[] shuffledDishList;
+	MapLayer mpLayer;
+	JLabel[] labelArray;
+	HashMap<String, Integer> dishMap = new HashMap<String, Integer>();
+	
+	String[] stringArray = {
+			"Apple<br> Pie","Onion<br> Soup","Seafood<br> Paella","Bacalhau","Satay","Hainanese<br> Chicken<br> Rice","Pasta","Kimbab",
+			"Foie Gras", "Macaron","Subway","Cart<br> Noodles","Brownie","Kobe<br> Beef","Yerba<br> Mate","Feijoada",
+			"Oyster<br> Omelet","Bak Kut<br> Teh","Maple<br> Syrup","Tortilla","Bratwurst","Wienerbroed","Souffle","Roast<br> Whole<br> Lamb",
+			"Hamburger","Sashimi","Doner<br> Meat","King<br> Crab","Dongpo<br> Pork","Buffalo<br> Wings","Kvass","Cold<br> Noodle",
+			"Belgian<br> Chocolate","Vietnamese<br> Pho","Baked<br> French<br> Snails","Tiramisu","Ice Wine","Miso<br> Soup","Vietnam<br> Spring<br> Roll","Kimchi",
+			"French<br> Fries","Borscht","Mango<br> Sticky<br> Rice","Taco","Udon","Norwegian<br> Salmon","Indian<br> Curry","Scampi",
+			"Puff","Dark Beer","Pecking<br> Duck","Naan<br> Bread","Kottbullar","Egg<br> Tarts","Pork<br> Trotters","Chinese<br> Hot Pot",
+			"Barbecued<br> Roasted<br> Goose","Sushi","Omurice","Tom Yam<br> Kung","Kung Pao<br> Chicken","Vodka","Tempura","Truffes<br> Chocolate"
+	};
+	double[] latitude = {
+			36.7, 47.1, 40.3, 38.8, 3.143, 20.1, 40.8, 35.2, 
+			44.7, 48.859, 39.7, 22.23, 42.361, 34.69, -32.5, -17.1,
+			25.05, 1.307, 39.7, 25.6, 52.527, 55.678, 45.6, 47.8,
+			40.72, 34.694, 39.924, 64.6, 30.244, 41.89, 55.01, 39.047,
+			50.83, 11.4, 43.76, 45.47, 43.65, 34.6, 10.84, 37.571,
+			51.508, 59.937, 13.6, 19.4, 33.9, 59.918, 28.64, 60.3,
+			41.907, 48.1, 39.897, 19.078, 59.553, 22.197, 53.5, 29.56,
+			22.278, 35.707, 43.01, 18.722, 30.645, 55.76, 35.187, 43.299
+			};
+	double[] longitude = {
+			-119.3, 2.4, -3.6, -9.1, 101.687, 110.23, 17.02, 129.1, 
+			-0.5, 2.353, -105.1, 114.24, -71.058, 135.196, -61.4, -50.3,
+			121.57, 103.823, -105.1, -100.2, 13.41, 12.569, 4.9,107.03,
+			-74.02, 135.503, 32.852, -148, 120.151, -87.63, 82.95, 125.761,
+			4.35, 106.1, 0.7, 9.188, -79.38, 135.5, 106.64, 126.979,
+			-0.12, 30.33, 100.6, -99.02, 130.9, 10.753, 77.23, 5.4,
+			12.498, 11.7, 116.399, 72.878, 18.07, 113.549, 10.01, 106.55,
+			114.75, 139.734, 141.4, 98.983, 104.049, 37.63, 136.906, 5.372
+	};
+
+	
+	/**
+	 * constructor of the view
+	 * @param iChatView2ModelAdapter	adapter from view to model
+	 */
+	public GameView(IGameView2ModelAdapter adp) {	
+		this._adpt = adp;
+		mpLayer = new MapLayer();
+		init();
+	}
+	/**
+	 * initial operations when starting the mini GUI
+	 */
+	public void init(){
+		initDishMap();
+		mapPanel = new MyMapPanel(new IPanel2ViewAdapter(){
+			private static final long serialVersionUID = -8344777119053146307L;
+			@Override
+			public void sendUpdate(String content) {
+				int l = dishMap.get(content).intValue();
+				_adpt.sendUpdate(l);
+			}		
+		});
+		mapPanel.start();
+		setBounds(100, 100, 1600, 460);
+		contentPanel = new JPanel();
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPanel.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPanel);
+		contentPanel.setLayout(new BorderLayout(0, 0));	
+		
+		/*initialize the dish array*/
+		for(int i = 0; i<64; i++){
+			dishArray[i] = new Dish(stringArray[i], latitude[i], longitude[i], 5000);
+		}
+		
+		/*East*/
+		JPanel cluePanel = new JPanel();		
+		cluePanel.setLayout(new BorderLayout(0, 0));
+		memberListModel = new DefaultListModel<String>();
+		JLabel clueLabel = new JLabel("Clue Matrix");
+		clueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		cluePanel.add(clueLabel, BorderLayout.SOUTH);
+		JPanel matrixPanel = new JPanel();
+		cluePanel.add(matrixPanel, BorderLayout.CENTER);
+		matrixPanel.setLayout(new GridLayout(8, 8, 1, 1));	
+		labelArray = new JLabel[64];
+		for(int i = 0; i<64; i++){
+			JLabel newLabel = new JLabel("<html>"+dishArray[i].getName()+"</html>");
+			newLabel.setBorder(BorderFactory.createLineBorder(Color.RED));
+			newLabel.setOpaque(true);
+			newLabel.setBackground(Color.gray);
+			labelArray[i] = newLabel;
+		}
+		for(int i = 0; i < 64; i++){
+			matrixPanel.add(labelArray[i]);
+		}
+		
+		/*North*/
+		JPanel toolPanel = new JPanel();
+		toolPanel.setLayout(new BorderLayout(0, 0));		
+		lblChatRoom = new JLabel("Dish Bingo");
+		lblChatRoom.setToolTipText("chatroom name");
+		lblChatRoom.setHorizontalAlignment(SwingConstants.CENTER);
+		toolPanel.add(lblChatRoom, BorderLayout.CENTER);		
+		LeaveChatroomButton = new JButton("Leave Game");
+		LeaveChatroomButton.setToolTipText("button for leaving chatroom");
+		toolPanel.add(LeaveChatroomButton, BorderLayout.EAST);
+		LeaveChatroomButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		
+		/*Center*/
+		for(int i = 0; i<64; i++){
+			addDish(dishArray[i]);
+		}
+	
+		mapPanel.addLayer(mpLayer);
+		
+		contentPanel.add(mapPanel, BorderLayout.CENTER);
+		contentPanel.add(toolPanel, BorderLayout.NORTH);
+		contentPanel.add(cluePanel, BorderLayout.EAST);
+
+		
+	}
+	/**
+	 * starting operation of the view
+	 */
+	public void start() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+			    setVisible(true);
+			}	
+		});
+	}
+	//test	
+	public void addDish(Dish d){
+		mpLayer.addToggleAnnotation(d.getName(), 
+				d.getName(), 
+				Position.fromDegrees(d.getLatitude(), 
+						d.getLongitude(), 
+						d.getElevation()), 
+						MIN_ALTITUDE, 
+						MAX_ALTITUDE);
+	}
+	
+	public void showLayer(RenderableLayer layer){
+		mapPanel.addLayer(layer);
+	}
+	
+
+	public void initDishMap(){
+		for(int i = 0; i<64; i++){
+			String s = stringArray[i];
+			dishMap.put(s, new Integer(i));
+		}
+	}
+	
+	public void setLabel(int l, int owner){
+		switch(owner){
+			case 0:
+				labelArray[l].setBackground(Color.GRAY);
+				break;	
+			case 1:
+				labelArray[l].setBackground(Color.RED);
+				break;	
+			case 2:
+				labelArray[l].setBackground(Color.BLUE);
+				break;	
+			case 3:
+				labelArray[l].setBackground(Color.GREEN);
+				break;	
+			default: 
+				break;	
+		}
+	}
+	public void updateLabelArray(int[] matrix) {
+		for(int i =0; i<64; i++){
+			setLabel(i, matrix[i]);
+		}	
+		this.repaint();
+	}
+}

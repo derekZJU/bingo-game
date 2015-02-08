@@ -1,0 +1,33 @@
+package dw35_wz23.server.model;
+
+import java.io.Serializable;
+
+import common.ICmd2ModelAdapter;
+
+import dw35_wz23.server.game.view.GameView;
+
+public class InstallMsg implements Serializable{
+	private ICmd2ModelAdapter model;
+	public ICmd2ModelAdapter getModel() {
+		return model;
+	}
+
+	public void setModel(ICmd2ModelAdapter model) {
+		this.model = model;
+	}
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6637044128757080515L;
+	GameView gv = new GameView();
+
+	public GameView getGv() {
+		return gv;
+	}
+
+	public void setGv(GameView gv) {
+		this.gv = gv;
+	}
+	
+}

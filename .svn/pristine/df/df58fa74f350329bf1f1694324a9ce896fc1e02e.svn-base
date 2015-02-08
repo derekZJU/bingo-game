@@ -1,0 +1,9 @@
+package dw35_wz23.server.game.model;
+
+import map.MapLayer;
+
+public interface IGameModel2ViewAdapter {
+	public void addDish(Dish p);
+	public void show(MapLayer layer);
+	public void hide(MapLayer layer);
+}

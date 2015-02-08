@@ -1,0 +1,102 @@
+package dw35_wz23.client.model;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.UUID;
+
+import provided.datapacket.ADataPacket;
+import provided.datapacket.DataPacket;
+import dw35_wz23.client.controller.ClientController;
+import dw35_wz23.server.chatroom.controller.ChatroomController;
+import dw35_wz23.server.chatroom.model.Chatroom;
+import common.IChatroom;
+import common.IJoinRoomMsg;
+import common.IPerson;
+
+/**
+ * The person class implements IPerson
+ * 
+ * @author dongjuan nian, di wu
+ *
+ */
+public class Person implements IPerson {
+	/**
+	 * the user name of person
+	 */
+	private String personName;
+	/**
+	 * uuID
+	 */
+	private UUID uuID = UUID.randomUUID();
+
+	/**
+	 * Constructor of Person class
+	 * 
+	 * @param personName
+	 *            the name of the person.
+	 */
+	public Person(String personName) {
+		this.personName = personName;
+	}
+
+	/**
+	 * connect back method
+	 */
+	@Override
+	public int connectBack(IPerson myPersonStub) throws RemoteException {
+		return 0;
+	}
+
+	/**
+	 * accept invitation to join a chatroom.
+	 */
+	@Override
+	public int acceptInvitation(IChatroom chatroom) throws RemoteException {
+		ChatroomController newController = ClientController.getInstance()
+				.getAppModel().addChatroom(chatroom);
+		System.out.println(newController.getMiniModel().getChatroom()
+				.getMembers().size());
+		ADataPacket joinPacket = new DataPacket<IJoinRoomMsg>(
+				IJoinRoomMsg.class, newController.getMiniModel().getMember(),
+				null);
+		newController.getMiniModel().sendMessage(joinPacket);
+		return IPerson.STATUS_SUCC;
+	}
+	/**
+	 * Receive the request to join the chat room.
+	 */
+	@Override
+	public int recvRequest(IPerson requesterStub) throws RemoteException {
+		System.out.println("Request received.");
+//		int size = ClientController.getInstance().getAppModel().getChatroomList()
+//				.size();
+//		ArrayList<ChatroomController> tmpChatroomList = ClientController.getInstance().getAppModel()
+//		.getChatroomList();
+//		IChatroom tmpChatroom = tmpChatroomList.get((int) (Math.random() * (size - 1))).getMiniModel().getChatroom();
+		ClientController
+				.getInstance()
+				.getAppModel()
+				.sendInvitation(
+						requesterStub,
+						ClientController.getInstance().getAppModel()
+								.getChatroomList()
+//								.get((int) (Math.random() * (size - 1)))
+								.get(0)
+								.getMiniModel().getChatroom());
+		return 0;
+	}
+	/**
+	 * get the user name 
+	 */
+	@Override
+	public String getName() throws RemoteException {
+		return this.personName;
+	}
+	/**
+	 * Get the UUID
+	 */
+	@Override
+	public UUID getUUID() throws RemoteException {
+		return uuID;
+	}
+}

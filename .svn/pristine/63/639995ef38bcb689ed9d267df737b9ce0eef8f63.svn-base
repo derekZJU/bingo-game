@@ -1,0 +1,35 @@
+package dw35_wz23.server.model;
+
+import java.io.Serializable;
+
+/**
+ * 
+ * @author dw35, wz23
+ *
+ */
+public class UpdateMatrixMsg implements Serializable{
+	private static final long serialVersionUID = 5027016097642879379L;
+	int teamID;
+	int dishNumber;
+	
+	public UpdateMatrixMsg(int team, int dishNum){
+		teamID = team;
+		dishNumber = dishNum;
+	}
+	
+	public int getDishNumber() {
+		return dishNumber;
+	}
+
+	public void setDishNumber(int dishNumber) {
+		this.dishNumber = dishNumber;
+	}
+
+	public int getTeamID() {
+		return teamID;
+	}
+
+	public void setTeamID(int teamID) {
+		this.teamID = teamID;
+	}
+}

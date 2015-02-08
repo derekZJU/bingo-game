@@ -1,0 +1,151 @@
+package dw35_wz23.server.controller;
+
+import java.awt.EventQueue;
+import java.util.ArrayList;
+
+import common.IChatroom;
+import common.IPerson;
+import dw35_wz23.chatroom.controller.ChatroomController;
+import dw35_wz23.server.model.ServerModel;
+import dw35_wz23.server.model.IModel2ViewAdapter;
+import dw35_wz23.server.view.ServerView;
+import dw35_wz23.server.view.IView2ModelAdapter;
+
+/**
+ * Controller for the chat app system.
+ * @author di wu, dongjuan nian
+ *
+ */
+public class ServerController {
+	
+	/**
+	 * the object of appcontroller
+	 */
+	private static ServerController instance = new ServerController();
+	/**
+	 * get the instance of controller
+	 * @return instance of controller
+	 */
+	public static ServerController getInstance() {
+		return instance;
+	}
+	
+	
+	
+	/**
+	 * The model of the ChatApp.
+	 */
+	private ServerModel model;
+	
+	
+	/**
+	 * The view of the ChatApp.
+	 */
+	private ServerView view;
+	
+	
+	/**
+	 * Construct the controller.
+	 */
+	private ServerController() {
+		model = new ServerModel(new IModel2ViewAdapter() {
+			/**
+			 * add chat room to list
+			 */
+			@Override
+			public void addChatroomToList(IChatroom chatroom) {
+				view.addChatroomToList(chatroom);
+			}
+		});
+		
+		view = new ServerView(new IView2ModelAdapter() {
+			/**
+			 * send request
+			 */
+			@Override
+			public int sendRequest(String ip) {
+				return model.sendRequest(ip);
+			}
+			/**
+			 * create chat room
+			 */
+			@Override
+			public void createChatroom() {
+				model.createChatroom();
+			}
+			/**
+			 * get the arraylist of chat room
+			 */
+			@Override
+			public ArrayList<ChatroomController> getChatroomList() {
+				return model.getChatroomList();
+			}
+			/**
+			 * add chat room
+			 */
+			@Override
+			public ChatroomController addChatroom(IChatroom chatroom) {
+				return model.addChatroom(chatroom);
+				
+			}
+			/**
+			 * send invitation
+			 */
+			@Override
+			public void sendInvitation(String IP, IChatroom chatroom) {
+				IPerson newPersonStub = model.getPersonStub(IP);
+				model.sendInvitation(newPersonStub, chatroom);
+				
+			}
+			@Override
+			public void sendStart() {
+				model.sendStart();
+				
+			}
+		});
+	}
+	
+	
+	/**
+	 * Start the controller.
+	 */
+	public void start() {
+		String name = "Bingo Server";
+		model.setUsername(name);
+		view.setUsername(name);
+		view.setLocalIP(model.getLocalIP());
+		model.start();
+		view.start();
+	}
+	
+	
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					ServerController.getInstance().start();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	/**
+	 * get the app model
+	 * @return app model
+	 */
+	public ServerModel getAppModel() {
+		return model;
+	}
+	/**
+	 * get the app view
+	 * @return app view
+	 */
+	public ServerView getAppView() {
+		return view;
+	}
+
+}

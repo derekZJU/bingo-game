@@ -1,0 +1,28 @@
+package dw35_wz23.server.chatroom.model;
+
+import java.io.Serializable;
+
+import common.ICmd2ModelAdapter;
+
+import provided.datapacket.ADataPacket;
+import provided.datapacket.ADataPacketAlgoCmd;
+import provided.datapacket.DataPacket;
+import dw35_wz23.server.model.DishMsg;
+import dw35_wz23.server.model.InstallMsg;
+
+public class DishCmd extends ADataPacketAlgoCmd<ADataPacket,DishMsg, Void> implements Serializable{
+
+	@Override
+	public ADataPacket apply(Class<?> index, DataPacket<DishMsg> host,
+			Void... params) {
+		System.out.println("Dish Name is: " + host.getData().getD().getName());
+		return null;
+	}
+
+	@Override
+	public void setCmd2ModelAdpt(ICmd2ModelAdapter cmd2ModelAdpt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

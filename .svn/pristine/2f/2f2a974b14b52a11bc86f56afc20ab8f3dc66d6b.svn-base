@@ -1,0 +1,28 @@
+package dw35_wz23.server.chatroom.model;
+
+import java.io.Serializable;
+
+import common.ICmd2ModelAdapter;
+import provided.datapacket.ADataPacket;
+import provided.datapacket.ADataPacketAlgoCmd;
+import provided.datapacket.DataPacket;
+import dw35_wz23.server.controller.ServerController;
+import dw35_wz23.server.model.EndTimeMsg;
+import dw35_wz23.server.model.UpdateMatrixMsg;
+
+public class EndTimeCmd extends ADataPacketAlgoCmd<ADataPacket,EndTimeMsg, Void> implements Serializable{
+
+	@Override
+	public ADataPacket apply(Class<?> index, DataPacket<EndTimeMsg> host,
+			Void... params) {
+		ServerController.getInstance().getAppModel().endTime();
+		return null;
+	}
+
+	@Override
+	public void setCmd2ModelAdpt(ICmd2ModelAdapter cmd2ModelAdpt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

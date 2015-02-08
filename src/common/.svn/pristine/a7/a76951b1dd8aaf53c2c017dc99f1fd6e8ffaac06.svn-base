@@ -1,0 +1,15 @@
+package common;
+
+import java.io.Serializable;
+
+
+/**
+ * Known message type for joining request
+ * @author Colin
+ *
+ */
+public interface IJoinRoomMsg extends Serializable {
+
+	//please use IMember getSender() in the ADatapacket to get the userstub
+
+}

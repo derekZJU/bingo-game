@@ -1,0 +1,104 @@
+package dw35_wz23.server.game.view;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+
+import map.MapPanel;
+import dw35_wz23.chatroom.view.IChatView2ModelAdapter;
+import dw35_wz23.client.controller.ClientController;
+
+public class GameView extends JPanel{
+	private static final long serialVersionUID = 3335681412100562629L;
+	public JList<String> memberList;
+	public DefaultListModel<String> memberListModel;
+	private JTextField inputField;
+	private JButton inputButton;
+	private JButton LeaveChatroomButton;
+	private JLabel lblChatRoom;
+	private IChatView2ModelAdapter chatModel;
+	private MapPanel mapPanel;
+	/**
+	 * constructor of the view
+	 * @param iChatView2ModelAdapter	adapter from view to model
+	 */
+	public GameView() {	
+		init();
+	}
+	/**
+	 * initial operations when starting the mini GUI
+	 */
+	public void init(){
+		setLayout(new BorderLayout(0, 0));	
+		/*East*/
+		JPanel memberListPanel = new JPanel();		
+		memberListPanel.setLayout(new BorderLayout(0, 0));	
+		memberList = new JList<String>();
+		memberList.setToolTipText("chat room member list");
+		memberListModel = new DefaultListModel<String>();
+		memberList.setModel(memberListModel);
+		memberListPanel.add(memberList, BorderLayout.CENTER);		
+		JLabel chatroomMemberLabel = new JLabel("Team Member");
+		chatroomMemberLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		memberListPanel.add(chatroomMemberLabel, BorderLayout.SOUTH);
+		
+		/*North*/
+		JPanel toolPanel = new JPanel();
+		toolPanel.setLayout(new BorderLayout(0, 0));		
+		lblChatRoom = new JLabel("Dish Bingo");
+		lblChatRoom.setToolTipText("chatroom name");
+		lblChatRoom.setHorizontalAlignment(SwingConstants.CENTER);
+		toolPanel.add(lblChatRoom, BorderLayout.CENTER);		
+		LeaveChatroomButton = new JButton("Leave Game");
+		LeaveChatroomButton.setToolTipText("button for leaving chatroom");
+		toolPanel.add(LeaveChatroomButton, BorderLayout.EAST);
+		LeaveChatroomButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				chatModel.getChatroom().removeMember(chatModel.getMember());
+				chatModel.sendLeaveMessage();
+				ClientController.getInstance().getAppModel().removeChatroom(chatModel.getChatroom());
+				ClientController.getInstance().getAppView().removeChatroom();
+			}
+		});
+		
+//		/*South*/
+//		JPanel inputPanel = new JPanel();		
+//		inputPanel.setLayout(new BorderLayout(0, 0));		
+//		inputField = new JTextField();
+//		inputField.setToolTipText("input textfield ");
+//		inputField.setColumns(10);
+//		inputPanel.add(inputField);		
+//		inputButton = new JButton();
+//		inputButton.setToolTipText("button for sending text");
+//		inputButton.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				chatModel.sendTextMessage(inputField.getText());
+//			}
+//		});
+//		inputButton.setText("send");
+//		inputPanel.add(inputButton, BorderLayout.EAST);
+		
+		/*Center*/
+		mapPanel = new MapPanel();
+		
+//		add(inputPanel, BorderLayout.SOUTH);
+		add(toolPanel, BorderLayout.NORTH);
+		add(memberListPanel, BorderLayout.EAST);
+		add(mapPanel, BorderLayout.CENTER);
+		
+	}
+	/**
+	 * starting operation of the view
+	 */
+	public void start() {
+		setVisible(true);
+	}
+}
